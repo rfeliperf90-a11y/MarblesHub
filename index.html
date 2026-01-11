@@ -1,0 +1,955 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MarblesHub - Gerenciador de Participantes para Marbles</title>
+    <meta property="og:title" content="MarblesHub">
+    <meta property="og:description" content="Um bot Discord poderoso para gerenciar sorteios de Marbles. Configure, exporte e sorteie com facilidade!">
+    <meta property="og:image" content="/mascot.png">
+    <meta property="og:url" content="https://marbleshub.vercel.app/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="MarblesHub">
+    <meta name="twitter:description" content="Gerenciador de Sorteios para Discord">
+    <meta name="twitter:image" content="/mascot.png">
+    <link rel="icon" type="image/x-icon" href="/mascot.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Sora:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', 'Space Grotesk', sans-serif;
+            color: #1a1a2e;
+            overflow-x: hidden;
+            background-attachment: fixed;
+        }
+
+        /* Fundo com efeitos */
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 30%, #24243e 60%, #0f0c29 100%);
+            z-index: -3;
+        }
+
+        /* Camada de luz animada */
+        .light-effect {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(124, 58, 231, 0.15) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: moveLight 20s infinite ease-in-out;
+            z-index: -2;
+            filter: blur(40px);
+        }
+
+        .light-effect:nth-child(9) {
+            width: 400px;
+            height: 400px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .light-effect:nth-child(10) {
+            width: 350px;
+            height: 350px;
+            bottom: 10%;
+            right: 10%;
+            animation-delay: 5s;
+        }
+
+        @keyframes moveLight {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+
+        /* Partículas brilhando */
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: twinkle 3s infinite ease-in-out;
+            z-index: -1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.5); }
+        }
+
+        .particle:nth-child(11) { width: 4px; height: 4px; top: 15%; left: 20%; animation-delay: 0s; }
+        .particle:nth-child(12) { width: 3px; height: 3px; top: 30%; left: 70%; animation-delay: 1s; }
+        .particle:nth-child(13) { width: 5px; height: 5px; top: 50%; left: 15%; animation-delay: 2s; }
+        .particle:nth-child(14) { width: 4px; height: 4px; top: 70%; left: 80%; animation-delay: 0.5s; }
+        .particle:nth-child(15) { width: 3px; height: 3px; top: 80%; left: 30%; animation-delay: 1.5s; }
+        .particle:nth-child(16) { width: 4px; height: 4px; top: 40%; left: 85%; animation-delay: 2.5s; }
+        .particle:nth-child(17) { width: 5px; height: 5px; top: 60%; left: 10%; animation-delay: 0.8s; }
+        .particle:nth-child(18) { width: 3px; height: 3px; top: 25%; left: 45%; animation-delay: 1.2s; }
+
+        /* Bolhas animadas */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.2));
+            box-shadow: inset -3px -3px 8px rgba(0, 0, 0, 0.2), 0 0 20px rgba(255, 255, 255, 0.4);
+            animation: float 20s infinite ease-in-out;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) translateX(0px) rotate(0deg);
+                opacity: 0.2;
+            }
+            25% {
+                transform: translateY(-150px) translateX(80px) rotate(90deg);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-300px) translateX(-50px) rotate(180deg);
+                opacity: 0.9;
+            }
+            75% {
+                transform: translateY(-150px) translateX(120px) rotate(270deg);
+                opacity: 0.6;
+            }
+        }
+
+        .bubble:nth-child(1) { width: 80px; height: 80px; left: 5%; top: 10%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 120px; height: 120px; left: 85%; top: 15%; animation-delay: 2s; }
+        .bubble:nth-child(3) { width: 60px; height: 60px; left: 50%; top: 50%; animation-delay: 4s; }
+        .bubble:nth-child(4) { width: 140px; height: 140px; left: 15%; top: 65%; animation-delay: 1s; }
+        .bubble:nth-child(5) { width: 90px; height: 90px; left: 80%; top: 70%; animation-delay: 3s; }
+        .bubble:nth-child(6) { width: 110px; height: 110px; left: 25%; top: 80%; animation-delay: 5s; }
+        .bubble:nth-child(7) { width: 130px; height: 130px; left: 70%; top: 5%; animation-delay: 2.5s; }
+        .bubble:nth-child(8) { width: 75px; height: 75px; left: 10%; top: 40%; animation-delay: 4.5s; }
+
+        /* Mascote */
+        .mascot-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 180px;
+            height: auto;
+            z-index: 10;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mascot-container:hover {
+            transform: scale(1.1);
+        }
+
+        .mascot {
+            width: 100%;
+            height: auto;
+            animation: bobbing 4s ease-in-out infinite, glow 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px rgba(157, 69, 255, 0.8));
+            transition: all 0.3s ease;
+        }
+
+        .mascot-container:hover .mascot {
+            filter: drop-shadow(0 0 60px rgba(0, 212, 255, 1)) drop-shadow(0 0 30px rgba(157, 69, 255, 0.9)) brightness(1.2);
+            animation: bobbingIntense 2s ease-in-out infinite;
+        }
+
+        @keyframes bobbingIntense {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-40px) rotate(5deg); }
+        }
+
+        @keyframes bobbing {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-30px) rotate(3deg); }
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(157, 69, 255, 0.8)); }
+            50% { filter: drop-shadow(0 0 60px rgba(0, 212, 255, 0.9)); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+            padding-top: 30px;
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        }
+
+        header h1 {
+            font-size: 4.2em;
+            margin-bottom: 10px;
+            font-weight: 900;
+            font-family: 'Space Grotesk', 'Playfair Display', sans-serif;
+            letter-spacing: 2px;
+            animation: headerGlow 2s ease-in-out infinite;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            background: linear-gradient(135deg, #00d4ff 0%, #9945ff 50%, #ff006e 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 10px 40px rgba(157, 69, 255, 0.3);
+        }
+
+        header h1:hover {
+            transform: scale(1.08) translateY(-8px);
+            letter-spacing: 4px;
+            filter: drop-shadow(0 0 40px rgba(157, 69, 255, 0.8)) drop-shadow(0 10px 30px rgba(0, 212, 255, 0.6));
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4), 0 0 10px rgba(255, 255, 255, 0.3); }
+            50% { text-shadow: 0 4px 25px rgba(0, 0, 0, 0.6), 0 0 30px rgba(255, 255, 255, 0.8); }
+        }
+
+        header p {
+            font-size: 1.5em;
+            opacity: 0.95;
+            font-weight: 400;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Sora', sans-serif;
+        }
+
+        .status-text {
+            font-size: 1.15em;
+            font-weight: 700;
+            display: inline-block;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(157, 69, 255, 0.3));
+            border-radius: 40px;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            animation: pulse 2s ease-in-out infinite;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                background: linear-gradient(135deg, rgba(0, 212, 255, 0.3), rgba(157, 69, 255, 0.3));
+                box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            }
+            50% { 
+                background: linear-gradient(135deg, rgba(0, 212, 255, 0.5), rgba(157, 69, 255, 0.5));
+                box-shadow: 0 0 40px rgba(157, 69, 255, 0.6);
+            }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: #2ecc71;
+            border-radius: 50%;
+            margin-left: 12px;
+            vertical-align: middle;
+            box-shadow: 0 0 15px #2ecc71, inset 0 0 5px rgba(46, 204, 113, 0.5);
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { 
+                box-shadow: 0 0 15px #2ecc71, inset 0 0 5px rgba(46, 204, 113, 0.5);
+                transform: scale(1);
+            }
+            50% { 
+                box-shadow: 0 0 30px #2ecc71, inset 0 0 5px rgba(46, 204, 113, 0.5);
+                transform: scale(1.2);
+            }
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(157, 69, 255, 0.2) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: moveGradient 8s ease-in-out infinite;
+            filter: blur(30px);
+        }
+
+        @keyframes moveGradient {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(50px, 50px); }
+        }
+
+        .card:hover {
+            transform: translateY(-20px) scale(1.02);
+            box-shadow: 0 20px 80px rgba(157, 69, 255, 0.3);
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .card h2 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.9em;
+            font-weight: 900;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(135deg, #00d4ff 0%, #9945ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card h2:hover {
+            transform: scale(1.1) translateX(10px);
+            letter-spacing: 1.5px;
+            filter: drop-shadow(0 0 20px rgba(0, 212, 255, 0.8)) drop-shadow(0 0 10px rgba(157, 69, 255, 0.6));
+        }
+
+        .card p, .card ul {
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 1.05em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .card ul li {
+            padding: 12px 0;
+            padding-left: 35px;
+            position: relative;
+        }
+
+        .card ul li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #00d4ff;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .command-section {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 50px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            margin-bottom: 30px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+
+        .command-section h2 {
+            color: #00d4ff;
+            margin-bottom: 35px;
+            font-size: 2.8em;
+            border-bottom: 4px solid;
+            border-image: linear-gradient(90deg, #00d4ff, #9945ff) 1;
+            padding-bottom: 20px;
+            font-weight: 900;
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: 1.5px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .command-section h2:hover {
+            transform: scale(1.06) translateY(-3px);
+            letter-spacing: 2.5px;
+            color: #ff006e;
+            text-shadow: 0 0 30px rgba(157, 69, 255, 0.6);
+            border-bottom-width: 6px;
+        }
+
+        .command-list {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .command-item-main {
+            background: linear-gradient(135deg, rgba(157, 69, 255, 0.15) 0%, rgba(0, 212, 255, 0.1) 100%);
+            border-left: 6px solid #9945ff;
+            padding: 32px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .command-item-main::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        .command-item-main:hover {
+            transform: translateX(12px) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(157, 69, 255, 0.3);
+            background: linear-gradient(135deg, rgba(157, 69, 255, 0.25) 0%, rgba(0, 212, 255, 0.2) 100%);
+        }
+
+        .command-item-main.active {
+            background: linear-gradient(135deg, #9945ff 0%, #00d4ff 100%);
+            color: white;
+            transform: scale(1.03) translateY(-8px);
+            box-shadow: 0 20px 50px rgba(157, 69, 255, 0.5);
+            border-left-color: #ff006e;
+        }
+
+        .command-item-main.active .command-name {
+            color: #f093fb;
+        }
+
+        .command-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .command-name {
+            font-family: 'Space Grotesk', monospace;
+            background: linear-gradient(135deg, #00d4ff, #9945ff);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: 0 6px 20px rgba(157, 69, 255, 0.4);
+            display: inline-block;
+            margin-bottom: 12px;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .command-item-main.active .command-name {
+            background: rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            box-shadow: 0 6px 20px rgba(255, 0, 110, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .toggle-icon {
+            font-size: 1.5em;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .command-item-main.active .toggle-icon {
+            transform: rotate(180deg) scale(1.2);
+        }
+
+        .command-desc {
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 10px;
+            line-height: 1.7;
+            font-size: 1em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .command-item-main.active .command-desc {
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .sub-actions {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .sub-actions.show {
+            max-height: 1000px;
+        }
+
+        .sub-button {
+            background: linear-gradient(135deg, rgba(157, 69, 255, 0.2) 0%, rgba(0, 212, 255, 0.15) 100%);
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            border-radius: 12px;
+            padding: 24px;
+            margin-left: 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+            animation: slideIn 0.5s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .sub-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        .sub-button:hover {
+            background: linear-gradient(135deg, #9945ff 0%, #00d4ff 100%);
+            color: white;
+            border-color: #ff006e;
+            transform: translateX(15px) scale(1.03);
+            box-shadow: 0 12px 30px rgba(157, 69, 255, 0.5);
+        }
+
+        .sub-button-title {
+            font-weight: 800;
+            font-size: 1.15em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Space Grotesk', sans-serif;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .sub-button-desc {
+            font-size: 0.95em;
+            opacity: 0.85;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.75);
+        }
+
+        .sub-button:hover .sub-button-desc {
+            opacity: 1;
+        }
+
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #9945ff, #ff006e);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 0.8em;
+            margin-right: 10px;
+            margin-top: 12px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(157, 69, 255, 0.4);
+        }
+
+        .badge.admin {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+        }
+
+        .badge.owner {
+            background: linear-gradient(135deg, #f39c12, #d68910);
+        }
+
+        .features-highlight {
+            background: linear-gradient(135deg, rgba(157, 69, 255, 0.2) 0%, rgba(0, 212, 255, 0.15) 100%);
+            border-left: 6px solid #00d4ff;
+            padding: 26px;
+            border-radius: 12px;
+            margin-bottom: 22px;
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.9;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+        }
+
+        .features-highlight strong {
+            color: #00d4ff;
+            font-weight: 800;
+        }
+
+        footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.9);
+            padding: 50px 0;
+            border-top: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 80px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        footer p {
+            margin: 12px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2.2em;
+            }
+
+            .mascot {
+                width: 120px;
+                bottom: 10px;
+                right: 10px;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+
+            .command-list {
+                gap: 15px;
+            }
+
+            .bubble {
+                display: none;
+            }
+
+            .particle {
+                display: none;
+            }
+
+            .command-item-main {
+                padding: 20px;
+            }
+
+            .sub-button {
+                margin-left: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-background">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+
+        <div class="light-effect"></div>
+        <div class="light-effect"></div>
+
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <a href="https://discord.com/oauth2/authorize?client_id=1433165665912623155&permissions=8&integration_type=0&scope=bot" target="_blank" rel="noopener noreferrer" class="mascot-container" title="Clique para adicionar MarblesHub ao seu servidor!">
+        <img src="/mascot.png" alt="MarblesHub Mascote" class="mascot">
+    </a>
+
+    <div class="container">
+        <header>
+            <h1>MarblesHub</h1>
+            <p>Gerenciador de Participantes para Marbles</p>
+            <div class="status-text">Online<span class="status-indicator"></span></div>
+        </header>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>O que o MarblesHub faz:</h2>
+                <p>MarblesHub é um bot Discord que facilita o gerenciamento de participantes para sorteios de Marbles. Integrado com o Marbles on Steam, permite que streamers exportem listas de participantes para gerar sorteios de forma rápida e divertida.</p>
+            </div>
+
+            <div class="card">
+                <h2>Principais Recursos</h2>
+                <ul>
+                    <li>Inscrição rápida de participantes</li>
+                    <li>Sistema de participação baseado em cargos</li>
+                    <li>Exportação em CSV para Marbles on Steam</li>
+                    <li>Gerenciamento de participantes</li>
+                    <li>Controle de blacklist</li>
+                    <li>Interface intuitiva e fácil de usar</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2>Como Funciona</h2>
+                <p>Configure o sorteio, deixe os participantes se inscreverem, gerencie a lista e exporte. Depois é só importar no Marbles on Steam e começar o sorteio quando quiser!</p>
+            </div>
+        </div>
+
+        <div class="command-section">
+            <h2>Comandos Disponíveis</h2>
+
+            <div class="command-list">
+                <!-- setup_sorteio -->
+                <div class="command-item-main" onclick="toggleSubActions(this)">
+                    <div class="command-header">
+                        <div>
+                            <div class="command-name">/setup_sorteio</div>
+                            <div class="command-desc">Configure um novo sorteio e defina os parâmetros</div>
+                            <span class="badge admin">Admin</span>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                </div>
+                <div class="sub-actions">
+                    <div class="sub-button">
+                        <div class="sub-button-title">Configurar Sorteio</div>
+                        <div class="sub-button-desc">Cria um novo sorteio com mensagem de inscrição e imagem/vídeo opcional</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Definir Hashtag Obrigatória</div>
+                        <div class="sub-button-desc">Define uma hashtag obrigatória que participantes devem usar</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Configurar Termos de Participação</div>
+                        <div class="sub-button-desc">Redefine os termos que participantes devem aceitar</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Gerenciar Cargos Bônus</div>
+                        <div class="sub-button-desc">Adiciona/remove cargos que ganham mais fichas no sorteio</div>
+                    </div>
+                </div>
+
+                <!-- gerenciar -->
+                <div class="command-item-main" onclick="toggleSubActions(this)">
+                    <div class="command-header">
+                        <div>
+                            <div class="command-name">/gerenciar</div>
+                            <div class="command-desc">Gerencia inscrições, participantes e blacklist</div>
+                            <span class="badge admin">Admin</span>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                </div>
+                <div class="sub-actions">
+                    <div class="sub-button">
+                        <div class="sub-button-title">Gerenciar Inscrições</div>
+                        <div class="sub-button-desc">Abre/fecha inscrições e controla alterações de dados dos participantes</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Gerenciar Participantes</div>
+                        <div class="sub-button-desc">Lista, remove ou adiciona participantes manualmente</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Gerenciar Fichas</div>
+                        <div class="sub-button-desc">Adiciona/remove fichas bônus de cargos e sincroniza dados</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Controles do Sistema</div>
+                        <div class="sub-button-desc">Backup, restauração, resetar sorteio, adicionar moderadores</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Exportar Lista</div>
+                        <div class="sub-button-desc">Exporta participantes em formato compatível com Marbles on Steam</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Gerenciar Blacklist</div>
+                        <div class="sub-button-desc">Bloqueia/desbloqueia usuários e controla quem pode participar</div>
+                    </div>
+                </div>
+
+                <!-- tag_manual -->
+                <div class="command-item-main" onclick="toggleSubActions(this)">
+                    <div class="command-header">
+                        <div>
+                            <div class="command-name">/tag_manual</div>
+                            <div class="command-desc">Concede fichas manuais (TAG) a um usuário específico</div>
+                            <span class="badge admin">Admin</span>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                </div>
+                <div class="sub-actions">
+                    <div class="sub-button">
+                        <div class="sub-button-title">Conceder TAG Manual</div>
+                        <div class="sub-button-desc">Concede fichas manuais (TAG) a um usuário específico (padrão: 1 ficha)</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Quantidade Customizável</div>
+                        <div class="sub-button-desc">Define quantas fichas conceder (1, 2, 3, etc.). Para remover a ficha, basta colocar 0</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Ficha Manual</div>
+                        <div class="sub-button-desc">Devido aos limites do Discord, este comando é manual pois ainda não há API de integração. Se disponibilizada posteriormente, esta função se tornará automática</div>
+                    </div>
+                </div>
+
+                <!-- anunciar -->
+                <div class="command-item-main" onclick="toggleSubActions(this)">
+                    <div class="command-header">
+                        <div>
+                            <div class="command-name">/anunciar</div>
+                            <div class="command-desc">Envia anúncios para canais</div>
+                            <span class="badge admin">Admin</span>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                </div>
+                <div class="sub-actions">
+                    <div class="sub-button">
+                        <div class="sub-button-title">Canal Destino</div>
+                        <div class="sub-button-desc">Escolha o canal onde o anúncio será enviado</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Mensagem Personalizada</div>
+                        <div class="sub-button-desc">Escreva a mensagem do anúncio (use \n para quebra de linha)</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Opções Avançadas</div>
+                        <div class="sub-button-desc">Use embed, adicione mídia (foto/vídeo) e botão de Termos de Participação</div>
+                    </div>
+                </div>
+
+                <!-- reagir -->
+                <div class="command-item-main" onclick="toggleSubActions(this)">
+                    <div class="command-header">
+                        <div>
+                            <div class="command-name">/reagir</div>
+                            <div class="command-desc">Adiciona reações em mensagens automaticamente</div>
+                            <span class="badge admin">Admin</span>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                </div>
+                <div class="sub-actions">
+                    <div class="sub-button">
+                        <div class="sub-button-title">ID da Mensagem</div>
+                        <div class="sub-button-desc">Forneça o ID da mensagem que deseja adicionar/remover reações</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Modo Adicionar/Remover</div>
+                        <div class="sub-button-desc">Escolha se quer adicionar (True) ou remover (False) as reações</div>
+                    </div>
+                    <div class="sub-button">
+                        <div class="sub-button-title">Lista de Emojis</div>
+                        <div class="sub-button-desc">Digite os emojis desejados separados por espaço (ex: 1️⃣ 2️⃣ 3️⃣)</div>
+                    </div>
+                </div>
+
+                <!-- bypass (Bloqueado) -->
+                <div class="command-item-main" style="opacity: 0.6; cursor: not-allowed;">
+                    <div class="command-header">
+                        <div>
+                            <div class="command-name">/bypass</div>
+                            <div class="command-desc">Comando restrito (Apenas proprietário)</div>
+                            <span class="badge owner">Proprietário</span>
+                        </div>
+                        <div class="toggle-icon">▼</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="command-section">
+            <h2>Como Usar</h2>
+
+            <div class="features-highlight">
+                <strong style="font-size: 1.1em;">Passo a passo:</strong>
+                <br><br>
+                1️⃣ <strong>Configure o sorteio</strong> com /setup_sorteio e defina as opções<br>
+                2️⃣ <strong>Deixe participantes se inscreverem</strong> usando o botão de inscrição<br>
+                3️⃣ <strong>Use /gerenciar</strong> para revisar e ajustar a lista<br>
+                4️⃣ <strong>Exporte</strong> através da opção de exportação em /gerenciar<br>
+                5️⃣ <strong>Importe no Marbles on Steam</strong> para gerar o sorteio<br>
+                <br>
+                <em style="color: #667eea;">O arquivo exportado já está no formato que o Marbles on Steam aceita!</em>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>MarblesHub</strong> - Gerenciador de Participantes para Marbles</p>
+            <p style="font-size: 0.9em; opacity: 0.9;">Integrado com Marbles on Steam | Discord.py</p>
+            <p style="font-size: 0.85em; opacity: 0.8; margin-top: 15px;">2024-2026 | Todos os direitos reservados</p>
+        </footer>
+    </div>
+
+    <script>
+        function toggleSubActions(element) {
+            // Remove active de outros comandos
+            document.querySelectorAll('.command-item-main').forEach(cmd => {
+                if (cmd !== element && cmd.classList.contains('active')) {
+                    cmd.classList.remove('active');
+                    const nextSubActions = cmd.nextElementSibling;
+                    if (nextSubActions && nextSubActions.classList.contains('sub-actions')) {
+                        nextSubActions.classList.remove('show');
+                    }
+                }
+            });
+
+            // Toggle o comando atual
+            if (!element.style.opacity || element.style.opacity === '1') {
+                element.classList.toggle('active');
+                const subActions = element.nextElementSibling;
+                if (subActions && subActions.classList.contains('sub-actions')) {
+                    subActions.classList.toggle('show');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
